@@ -10,5 +10,5 @@ class PointEarnEventHandler(
 ) {
 
     @RabbitListener(queues = ["point-earn-event-queue"])
-    fun subscribe(earnEvent: EarnPointEvent) = pointEarnService.earnPoints(earnEvent)
+    fun subscribe(earnEvent: PointEarnEvent) = pointEarnService.earnPoints(earnEvent)
 }

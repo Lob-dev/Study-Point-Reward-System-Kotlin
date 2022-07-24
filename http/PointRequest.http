@@ -1,0 +1,61 @@
+
+### gift Point
+POST {{apiAddress}}/api/points/gift
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "targetUserId": 2,
+  "eventType": "USE_GIFT",
+  "actionType": "USE",
+  "initialPoint": 50
+}
+
+### earn Point
+POST {{apiAddress}}/api/points
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "eventType": "SAVE_REWARD",
+  "actionType": "SAVE",
+  "initialPoint": 50
+}
+
+### use Point
+PUT {{apiAddress}}/api/points
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "eventType": "USE_GIFT",
+  "actionType": "USE",
+  "usePoint": 30
+}
+
+### cancel use Point
+PATCH {{apiAddress}}/api/points
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "historyId": 1,
+  "eventType": "USE_GIFT",
+  "actionType": "USE"
+}
+
+### current Accumulated Point
+GET {{apiAddress}}/api/points
+Content-Type: application/json
+
+{
+  "userId": 1
+}
+
+### today Accumulated Point
+GET {{apiAddress}}/api/points
+Content-Type: application/json
+
+{
+  "userId": 1
+}

@@ -1,7 +1,9 @@
 package demo.point.edge.interfaces.api
 
 import demo.point.edge.application.PointFacadeService
+import demo.point.edge.common.annotation.IdempotentProcess
 import demo.point.edge.domain.point.PointHistoryService
+import demo.point.edge.domain.point.total.PointTotal
 import demo.point.edge.domain.point.total.PointTotalService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -16,32 +18,40 @@ class PointController(
 ) {
 
     @PostMapping("/gift")
-    fun giftPoints(giftPointRequest: GiftPointRequest): ResponseEntity<Void> {
-        pointFacadeService.giftPoints(giftPointRequest)
+    fun giftPoints(request: PointPresentRequest): ResponseEntity<Void> {
+        pointFacadeService.giftPoints(request)
         return ResponseEntity.status(HttpStatus.OK).build()
     }
 
     @PostMapping
-    fun earnPoints(earnPointRequest: EarnPointRequest): ResponseEntity<Void> {
-        pointFacadeService.earnPoints(earnPointRequest)
+    fun earnPoints(request: PointEarnRequest): ResponseEntity<Void> {
+        pointFacadeService.earnPoints(request)
         return ResponseEntity.status(HttpStatus.CREATED).build()
     }
 
     @PutMapping
-    fun usePoints(usePointRequest: UsePointRequest): ResponseEntity<Void> {
-        pointFacadeService.usePoints(usePointRequest)
+    fun usePoints(request: PointUseRequest): ResponseEntity<Void> {
+        pointFacadeService.usePoints(request)
         return ResponseEntity.status(HttpStatus.OK).build()
     }
 
+    @IdempotentProcess(prefix = "#request.userId", suffix = "#request.actionType")
     @PatchMapping
-    fun cancelPointByHistory(cancelPointRequest: CancelPointRequest) =
-        pointFacadeService.cancelPoints(cancelPointRequest)
+    fun cancelPointByHistory(request: PointCancelRequest): ResponseEntity<Void> {
+        pointFacadeService.cancelPoints(request)
+        return ResponseEntity.status(HttpStatus.OK).build()
+    }
 
     @GetMapping("/current")
-    fun findAvailablePointsByCurrent(currentPointRequest: CurrentPointRequest) =
-        pointTotalService.findCurrentPointsBy(currentPointRequest.userId)
+    fun findAvailablePointsByCurrent(request: PointCurrentAvailableFindRequest): ResponseEntity<PointTotal> {
+        val findCurrentPoints = pointTotalService.findCurrentPointsBy(request.userId)
+        return ResponseEntity.status(HttpStatus.OK).body(findCurrentPoints)
+    }
 
     @GetMapping("/today")
-    fun findAccumulatedPointsByToday(accumulatedPointRequest: AccumulatedPointRequest) =
-        pointHistoryService.findAccumulatedPointsBy(accumulatedPointRequest.userId)
+    fun findAccumulatedPointsByToday(request: PointAccumulateToDayRequest): ResponseEntity<Long> {
+        val accumulatedPoints = pointHistoryService.findAccumulatedPointsBy(request.userId)
+            .sumOf { it.point }
+        return ResponseEntity.status(HttpStatus.OK).body(accumulatedPoints)
+    }
 }

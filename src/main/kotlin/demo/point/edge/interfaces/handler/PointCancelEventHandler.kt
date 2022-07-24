@@ -10,5 +10,5 @@ class PointCancelEventHandler(
 ) {
 
     @RabbitListener(queues = ["point-cancel-event-queue"])
-    fun subscribe(cancelEvent: CancelPointEvent) = pointCancelService.cancelPoints(cancelEvent)
+    fun subscribe(cancelEvent: PointCancelEvent) = pointCancelService.cancelPoints(cancelEvent)
 }

@@ -10,5 +10,5 @@ class PointGiftEventHandler(
 ) {
 
     @RabbitListener(queues = ["point-gift-event-queue"])
-    fun subscribe(giftPointEvent: GiftPointEvent) = pointGiftService.deliveryGift(giftPointEvent)
+    fun subscribe(pointPresentEvent: PointPresentEvent) = pointGiftService.deliveryPresentPoints(pointPresentEvent)
 }

@@ -3,22 +3,20 @@ package demo.point.edge.application
 import demo.point.edge.common.BusinessException
 import demo.point.edge.common.ErrorStatus
 import demo.point.edge.common.UUIDKeyGenerator
+import demo.point.edge.common.annotation.DistributedLock
 import demo.point.edge.common.annotation.FacadeService
 import demo.point.edge.domain.PointHistoryActivityService
 import demo.point.edge.domain.point.PointHistoryActivity
 import demo.point.edge.domain.point.PointHistoryService
 import demo.point.edge.domain.point.active.PointActivityService
-import demo.point.edge.domain.point.models.OperationType
+import demo.point.edge.domain.point.models.OperationType.MINUS
 import demo.point.edge.domain.point.total.PointTotalService
 import demo.point.edge.domain.queue.PointEventPublisher
-import demo.point.edge.interfaces.api.CancelPointRequest
-import demo.point.edge.interfaces.api.EarnPointRequest
-import demo.point.edge.interfaces.api.GiftPointRequest
-import demo.point.edge.interfaces.api.UsePointRequest
-import org.redisson.api.RLock
-import org.redisson.api.RedissonClient
+import demo.point.edge.interfaces.api.PointCancelRequest
+import demo.point.edge.interfaces.api.PointEarnRequest
+import demo.point.edge.interfaces.api.PointPresentRequest
+import demo.point.edge.interfaces.api.PointUseRequest
 import org.springframework.transaction.annotation.Transactional
-import java.util.concurrent.TimeUnit
 
 @FacadeService
 class PointFacadeService(
@@ -27,81 +25,58 @@ class PointFacadeService(
     private val pointActivityService: PointActivityService,
     private val pointHistoryActivityService: PointHistoryActivityService,
     private val pointTotalService: PointTotalService,
-    private val redissonClient: RedissonClient,
 ) {
 
-    fun giftPoints(giftPointRequest: GiftPointRequest) =
+    fun giftPoints(presentRequest: PointPresentRequest) =
         pointEventPublisher.sendEvent(
             "point-gift-event-queue",
-            giftPointRequest.toEvent(UUIDKeyGenerator.generate())
+            presentRequest.toEvent(UUIDKeyGenerator.generate())
         )
 
-    fun earnPoints(earnPointRequest: EarnPointRequest) =
+    fun earnPoints(earnRequest: PointEarnRequest) =
         pointEventPublisher.sendEvent(
             "point-earn-event-queue",
-            earnPointRequest.toEvent(UUIDKeyGenerator.generate())
+            earnRequest.toEvent(UUIDKeyGenerator.generate())
         )
 
+    @DistributedLock(prefix = "POINT:", key = "#cancelEvent.userId")
     @Transactional
-    fun usePoints(usePointRequest: UsePointRequest) {
+    fun usePoints(useRequest: PointUseRequest) {
         val eventId = UUIDKeyGenerator.generate()
-        val userId = usePointRequest.userId
-        val actionType = usePointRequest.actionType
+        val userId = useRequest.userId
+        val usePoint = useRequest.usePoint
 
-        val usePoint = usePointRequest.usePoint
-        val lockName = "POINT:$userId:LOCK"
-        val lock: RLock = redissonClient.getLock(lockName)
-        if (lock.isLocked) {
-            throw BusinessException(
-                ErrorStatus.DUPLICATE_REQUEST,
-                "it was duplicate request. user id = $userId, action type = $actionType"
-            )
+        var bucketByPoint = useRequest.usePoint
+        val currentPointsByUser = pointActivityService.findAllCurrentPointsBy(userId)
+        currentPointsByUser.forEach {
+            bucketByPoint = it.redeemPoint(bucketByPoint)
         }
 
-        try {
-            if (!lock.tryLock(1, 5, TimeUnit.SECONDS)) {
-                throw BusinessException(ErrorStatus.LOCK_TIMEOUT, "it was tryLock timeout. user id = $userId")
-            }
+        if (bucketByPoint > 0L) {
+            throw BusinessException(
+                ErrorStatus.POINT_OVERFLOW,
+                "it was point overflow. user id = $userId, remain point = $bucketByPoint"
+            )
+        }
+        val updatedCurrentPointsByUser = pointActivityService.updateCurrentPointsBy(currentPointsByUser)
 
-            var bucketByPoint = usePointRequest.usePoint
-            val currentPointsByUser = pointActivityService.getCurrentPointsBy(userId)
-            currentPointsByUser.forEach {
-                bucketByPoint = it.redeemPoint(bucketByPoint)
-            }
+        val newHistoryId = pointHistoryService.createHistoryBy(useRequest.toHistory(eventId)).id
+        val historyActivities = updatedCurrentPointsByUser
+            .map { PointHistoryActivity(null, newHistoryId, it.id) }
+            .toList()
+        pointHistoryActivityService.createHistoryActivityBy(historyActivities)
 
-            if (usePoint > 0L) {
-                throw BusinessException(
-                    ErrorStatus.POINT_OVERFLOW,
-                    "it was point overflow. user id = $userId, remain point = $bucketByPoint"
-                )
-            }
-            val updatedCurrentPointsByUser = pointActivityService.updateCurrentPointsBy(currentPointsByUser)
-
-            val newHistoryId = pointHistoryService.createHistoryBy(usePointRequest.toHistory(eventId)).id
-            val historyActivities = updatedCurrentPointsByUser
-                .map { PointHistoryActivity(null, newHistoryId, it.id) }
-                .toList()
-
-            pointHistoryActivityService.createHistoryActivityBy(historyActivities)
-
-            val currentPoints = pointTotalService.findCurrentPointsBy(userId)
-            when {
-                currentPoints != null -> currentPoints.updatePointsBy(usePoint, OperationType.MINUS)
-                else -> {
-                    val currentPointsBy = pointActivityService.getCurrentPointsBy(userId)
-                    pointTotalService.createTotalPointBy(userId, currentPointsBy.sumOf { it.currentPoint })
-                }
-            }
-        } finally {
-            if (lock.isLocked) {
-                lock.unlock()
+        pointTotalService.findCurrentPointsBy(userId).let {
+            it?.updatePointsBy(usePoint, MINUS) ?: {
+                val currentPointsBy = pointActivityService.findAllCurrentPointsBy(userId)
+                pointTotalService.createTotalPointBy(userId, currentPointsBy.sumOf { point -> point.currentPoint })
             }
         }
     }
 
-    fun cancelPoints(cancelPointRequest: CancelPointRequest) =
+    fun cancelPoints(cancelRequest: PointCancelRequest) =
         pointEventPublisher.sendEvent(
             "point-cancel-event-queue",
-            cancelPointRequest.toEvent(UUIDKeyGenerator.generate())
+            cancelRequest.toEvent(UUIDKeyGenerator.generate())
         )
 }
