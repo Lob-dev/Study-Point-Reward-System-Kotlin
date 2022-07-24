@@ -1,8 +1,5 @@
 package demo.point.edge.domain.point.total
 
-import demo.point.edge.domain.point.models.OperationType
-import demo.point.edge.domain.point.models.OperationType.*
-import demo.point.edge.interfaces.api.CurrentPointRequest
 import org.springframework.stereotype.Service
 
 @Service

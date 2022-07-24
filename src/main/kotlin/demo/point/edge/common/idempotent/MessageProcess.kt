@@ -1,13 +1,12 @@
-package demo.point.edge.domain.point.idempotent
+package demo.point.edge.common.idempotent
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.redis.core.RedisHash
 
-@RedisHash("point-process")
-class PointProcess(
+@RedisHash("message-process")
+class MessageProcess(
     @Id
-    var userId: Long,
-    private var historyId: Long,
+    var key: String
 ) {
 
     companion object {
