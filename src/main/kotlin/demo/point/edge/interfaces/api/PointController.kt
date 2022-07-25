@@ -18,38 +18,38 @@ class PointController(
 ) {
 
     @PostMapping("/gift")
-    fun giftPoints(request: GiftPointRequest): ResponseEntity<Void> {
+    fun giftPoints(request: PointPresentRequest): ResponseEntity<Void> {
         pointFacadeService.giftPoints(request)
         return ResponseEntity.status(HttpStatus.OK).build()
     }
 
     @PostMapping
-    fun earnPoints(request: EarnPointRequest): ResponseEntity<Void> {
+    fun earnPoints(request: PointEarnRequest): ResponseEntity<Void> {
         pointFacadeService.earnPoints(request)
         return ResponseEntity.status(HttpStatus.CREATED).build()
     }
 
     @PutMapping
-    fun usePoints(request: UsePointRequest): ResponseEntity<Void> {
+    fun usePoints(request: PointUseRequest): ResponseEntity<Void> {
         pointFacadeService.usePoints(request)
         return ResponseEntity.status(HttpStatus.OK).build()
     }
 
     @IdempotentProcess(prefix = "#request.userId", suffix = "#request.actionType")
     @PatchMapping
-    fun cancelPointByHistory(request: CancelPointRequest): ResponseEntity<Void> {
+    fun cancelPointByHistory(request: PointCancelRequest): ResponseEntity<Void> {
         pointFacadeService.cancelPoints(request)
         return ResponseEntity.status(HttpStatus.OK).build()
     }
 
     @GetMapping("/current")
-    fun findAvailablePointsByCurrent(request: CurrentPointRequest): ResponseEntity<PointTotal> {
+    fun findAvailablePointsByCurrent(request: PointCurrentAvailableFindRequest): ResponseEntity<PointTotal> {
         val findCurrentPoints = pointTotalService.findCurrentPointsBy(request.userId)
         return ResponseEntity.status(HttpStatus.OK).body(findCurrentPoints)
     }
 
     @GetMapping("/today")
-    fun findAccumulatedPointsByToday(request: AccumulatedPointRequest): ResponseEntity<Long> {
+    fun findAccumulatedPointsByToday(request: PointAccumulateToDayRequest): ResponseEntity<Long> {
         val accumulatedPoints = pointHistoryService.findAccumulatedPointsBy(request.userId)
             .sumOf { it.point }
         return ResponseEntity.status(HttpStatus.OK).body(accumulatedPoints)

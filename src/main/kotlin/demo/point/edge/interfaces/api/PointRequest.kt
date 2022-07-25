@@ -3,65 +3,67 @@ package demo.point.edge.interfaces.api
 import demo.point.edge.domain.point.PointHistory
 import demo.point.edge.domain.point.models.ActionType
 import demo.point.edge.domain.point.models.EventType
-import demo.point.edge.interfaces.handler.GiftPointEvent
-import demo.point.edge.interfaces.handler.EarnPointEvent
-import demo.point.edge.interfaces.handler.CancelPointEvent
+import demo.point.edge.domain.point.models.PointType
+import demo.point.edge.interfaces.handler.PointCancelEvent
+import demo.point.edge.interfaces.handler.PointEarnEvent
+import demo.point.edge.interfaces.handler.PointPresentEvent
 
 
-data class GiftPointRequest(
+data class PointPresentRequest(
     val userId: Long,
     val targetUserId: Long,
+    val pointType: PointType,
     val eventType: EventType,
     val actionType: ActionType,
     val initialPoint: Long,
 ) {
 
-    fun toEvent(eventId: String) =
-        GiftPointEvent(
-            eventId = eventId,
-            userId = userId,
-            targetUserId = targetUserId,
-            eventType = eventType,
-            actionType = actionType,
-            initialPoint = initialPoint
-        )
+    fun toEvent(eventId: String) = PointPresentEvent(
+        eventId = eventId,
+        userId = userId,
+        recipientId = targetUserId,
+        pointType = pointType,
+        eventType = eventType,
+        actionType = actionType,
+        initialPoint = initialPoint
+    )
 }
 
-data class EarnPointRequest(
+data class PointEarnRequest(
     val userId: Long,
+    val pointType: PointType,
     val eventType: EventType,
     val actionType: ActionType,
     val initialPoint: Long,
 ) {
 
-    fun toEvent(eventId: String) =
-        EarnPointEvent(
-            userId = userId,
-            eventId = eventId,
-            eventType = eventType,
-            actionType = actionType,
-            initialPoint = initialPoint,
-        )
+    fun toEvent(eventId: String) = PointEarnEvent(
+        userId = userId,
+        eventId = eventId,
+        pointType = pointType,
+        eventType = eventType,
+        actionType = actionType,
+        initialPoint = initialPoint,
+    )
 }
 
-data class CancelPointRequest(
+data class PointCancelRequest(
     val userId: Long,
     val historyId: Long,
     val eventType: EventType,
     val actionType: ActionType,
 ) {
 
-    fun toEvent(eventId: String) =
-        CancelPointEvent(
-            eventId = eventId,
-            userId = userId,
-            historyId = historyId,
-            eventType = eventType,
-            actionType = actionType,
-        )
+    fun toEvent(eventId: String) = PointCancelEvent(
+        eventId = eventId,
+        userId = userId,
+        historyId = historyId,
+        eventType = eventType,
+        actionType = actionType,
+    )
 }
 
-data class UsePointRequest(
+data class PointUseRequest(
     val userId: Long,
     val eventType: EventType,
     val actionType: ActionType,
@@ -78,10 +80,10 @@ data class UsePointRequest(
     )
 }
 
-data class CurrentPointRequest(
+data class PointCurrentAvailableFindRequest(
     val userId: Long,
 ) {}
 
-data class AccumulatedPointRequest(
+data class PointAccumulateToDayRequest(
     val userId: Long,
 ) {}

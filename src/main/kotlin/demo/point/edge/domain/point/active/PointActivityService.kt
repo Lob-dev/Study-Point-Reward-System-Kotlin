@@ -7,7 +7,10 @@ class PointActivityService(
     private val pointActivityRepository: PointActivityRepository,
 ) {
 
-    fun getCurrentPointsBy(userId: Long): List<PointActivity> =
+    fun createActivityBy(pointActivity: PointActivity) =
+        pointActivityRepository.save(pointActivity)
+
+    fun findAllCurrentPointsBy(userId: Long): List<PointActivity> =
         pointActivityRepository.findAllByUserIdAndCurrentPointGreaterThan(userId, 0)
 
     fun updateCurrentPointsBy(pointActivities: List<PointActivity>): MutableList<PointActivity> =

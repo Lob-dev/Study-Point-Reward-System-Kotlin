@@ -18,6 +18,11 @@ class PointHistoryService(
     fun createHistoryBy(newHistory: PointHistory): PointHistory =
         pointHistoryRepository.save(newHistory)
 
+    fun createEffectHistoryBy(effectHistoryId: Long?, newHistory: PointHistory): PointHistory {
+        newHistory.associateHistoryId = effectHistoryId
+        return pointHistoryRepository.save(newHistory)
+    }
+
     fun findBy(historyId: Long): PointHistory {
         return pointHistoryRepository.findById(historyId).orElseThrow {
             BusinessException(

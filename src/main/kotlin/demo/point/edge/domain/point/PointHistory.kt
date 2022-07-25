@@ -13,7 +13,7 @@ class PointHistory(
     var id: Long? = null,
     private var eventId: String,
     private var userId: Long,
-    private var effectHistoryId: Long? = null,
+    var associateHistoryId: Long? = null,
     @Enumerated(EnumType.STRING)
     private var eventType: EventType,
     @Enumerated(EnumType.STRING)

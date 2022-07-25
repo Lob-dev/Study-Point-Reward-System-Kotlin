@@ -6,8 +6,9 @@ enum class EventType {
     SAVE_AD_CLICK,
     SAVE_REWARD,
     SAVE_GIFT,
+    SAVE_CANCEL,
+
     USE_GIFT,
     USE_BUY,
-    USE_CANCEL,
-    EXPIRE_DATE
+    USE_EXPIRE,
 }

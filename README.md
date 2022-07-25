@@ -1,5 +1,17 @@
 # Study-Point-Reward-System-Kotlin
-22-07-23 ~ 24일 간 Point Reward System 공부 및 기능 구현 해보기
+
+<br/>
+
+## 주 개발 일정 : 
+- 22-07-23 ~ 24 
+- 구현 안된 기능, 테스트는 점진적으로 진행
+
+<br/>
+
+## 목적 : 
+Point Reward System 공부 및 기능 구현 해보기
+
+<br/>
 
 ### 주저리 주저리
 - 일부 쿼리를 JOOQ로 작성하면 Lock 범위도 조절 가능할 것 같다. (연관 데이터 정합성을 위해 Lock 범위를 크게 유지하는게 나을지 고민)

@@ -9,13 +9,13 @@ import demo.point.edge.domain.PointHistoryActivityService
 import demo.point.edge.domain.point.PointHistoryActivity
 import demo.point.edge.domain.point.PointHistoryService
 import demo.point.edge.domain.point.active.PointActivityService
-import demo.point.edge.domain.point.models.OperationType
+import demo.point.edge.domain.point.models.OperationType.MINUS
 import demo.point.edge.domain.point.total.PointTotalService
 import demo.point.edge.domain.queue.PointEventPublisher
-import demo.point.edge.interfaces.api.CancelPointRequest
-import demo.point.edge.interfaces.api.EarnPointRequest
-import demo.point.edge.interfaces.api.GiftPointRequest
-import demo.point.edge.interfaces.api.UsePointRequest
+import demo.point.edge.interfaces.api.PointCancelRequest
+import demo.point.edge.interfaces.api.PointEarnRequest
+import demo.point.edge.interfaces.api.PointPresentRequest
+import demo.point.edge.interfaces.api.PointUseRequest
 import org.springframework.transaction.annotation.Transactional
 
 @FacadeService
@@ -27,32 +27,32 @@ class PointFacadeService(
     private val pointTotalService: PointTotalService,
 ) {
 
-    fun giftPoints(giftPointRequest: GiftPointRequest) =
+    fun giftPoints(presentRequest: PointPresentRequest) =
         pointEventPublisher.sendEvent(
             "point-gift-event-queue",
-            giftPointRequest.toEvent(UUIDKeyGenerator.generate())
+            presentRequest.toEvent(UUIDKeyGenerator.generate())
         )
 
-    fun earnPoints(earnPointRequest: EarnPointRequest) =
+    fun earnPoints(earnRequest: PointEarnRequest) =
         pointEventPublisher.sendEvent(
             "point-earn-event-queue",
-            earnPointRequest.toEvent(UUIDKeyGenerator.generate())
+            earnRequest.toEvent(UUIDKeyGenerator.generate())
         )
 
     @DistributedLock(prefix = "POINT:", key = "#cancelEvent.userId")
     @Transactional
-    fun usePoints(usePointRequest: UsePointRequest) {
+    fun usePoints(useRequest: PointUseRequest) {
         val eventId = UUIDKeyGenerator.generate()
-        val userId = usePointRequest.userId
-        val usePoint = usePointRequest.usePoint
+        val userId = useRequest.userId
+        val usePoint = useRequest.usePoint
 
-        var bucketByPoint = usePointRequest.usePoint
-        val currentPointsByUser = pointActivityService.getCurrentPointsBy(userId)
+        var bucketByPoint = useRequest.usePoint
+        val currentPointsByUser = pointActivityService.findAllCurrentPointsBy(userId)
         currentPointsByUser.forEach {
             bucketByPoint = it.redeemPoint(bucketByPoint)
         }
 
-        if (usePoint > 0L) {
+        if (bucketByPoint > 0L) {
             throw BusinessException(
                 ErrorStatus.POINT_OVERFLOW,
                 "it was point overflow. user id = $userId, remain point = $bucketByPoint"
@@ -60,25 +60,23 @@ class PointFacadeService(
         }
         val updatedCurrentPointsByUser = pointActivityService.updateCurrentPointsBy(currentPointsByUser)
 
-        val newHistoryId = pointHistoryService.createHistoryBy(usePointRequest.toHistory(eventId)).id
+        val newHistoryId = pointHistoryService.createHistoryBy(useRequest.toHistory(eventId)).id
         val historyActivities = updatedCurrentPointsByUser
             .map { PointHistoryActivity(null, newHistoryId, it.id) }
             .toList()
         pointHistoryActivityService.createHistoryActivityBy(historyActivities)
 
-        val currentPoints = pointTotalService.findCurrentPointsBy(userId)
-        when {
-            currentPoints != null -> currentPoints.updatePointsBy(usePoint, OperationType.MINUS)
-            else -> {
-                val currentPointsBy = pointActivityService.getCurrentPointsBy(userId)
-                pointTotalService.createTotalPointBy(userId, currentPointsBy.sumOf { it.currentPoint })
+        pointTotalService.findCurrentPointsBy(userId).let {
+            it?.updatePointsBy(usePoint, MINUS) ?: {
+                val currentPointsBy = pointActivityService.findAllCurrentPointsBy(userId)
+                pointTotalService.createTotalPointBy(userId, currentPointsBy.sumOf { point -> point.currentPoint })
             }
         }
     }
 
-    fun cancelPoints(cancelPointRequest: CancelPointRequest) =
+    fun cancelPoints(cancelRequest: PointCancelRequest) =
         pointEventPublisher.sendEvent(
             "point-cancel-event-queue",
-            cancelPointRequest.toEvent(UUIDKeyGenerator.generate())
+            cancelRequest.toEvent(UUIDKeyGenerator.generate())
         )
 }
