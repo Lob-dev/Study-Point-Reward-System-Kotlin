@@ -2,7 +2,6 @@ package demo.point.edge.common.idempotent
 
 import demo.point.edge.common.BusinessException
 import demo.point.edge.common.ErrorStatus
-import demo.point.edge.common.annotation.IdempotentProcess
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
@@ -25,18 +24,18 @@ import org.springframework.stereotype.Component
  * }
  * </pre>
  *
- * @see IdempotentProcess
+ * @see Idempotent
  */
 @Order(0)
 @Aspect
 @Component
-class IdempotentProcessAspect(
+class IdempotentAspect(
     private val messageProcessService: MessageProcessService,
 ) {
     private val expressionParser: ExpressionParser = SpelExpressionParser()
     private val nameDiscoverer: ParameterNameDiscoverer = DefaultParameterNameDiscoverer()
 
-    @Pointcut(value = "@annotation(demo.point.edge.common.annotation.Idempotent)")
+    @Pointcut(value = "@annotation(demo.point.edge.common.idempotent.Idempotent)")
     fun idempotentPointCut() {
     }
 
@@ -49,7 +48,7 @@ class IdempotentProcessAspect(
         }
 
         val evaluationContext = MethodBasedEvaluationContext(joinPoint.args[0], method, joinPoint.args, nameDiscoverer)
-        val annotation = method.getAnnotation(IdempotentProcess::class.java)
+        val annotation = method.getAnnotation(Idempotent::class.java)
         val prefix = expressionParser.parseExpression(annotation.prefix)
             .getValue(evaluationContext)
             .toString()

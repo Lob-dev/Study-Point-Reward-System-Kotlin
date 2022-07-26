@@ -1,4 +1,4 @@
-package demo.point.edge.common.annotation
+package demo.point.edge.common.lock
 
 import java.util.concurrent.TimeUnit
 

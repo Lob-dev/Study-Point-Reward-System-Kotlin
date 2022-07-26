@@ -7,6 +7,11 @@ import java.time.ZonedDateTime
 import javax.persistence.*
 
 @Entity
+@Table(
+    indexes = [
+        Index(name = "IDX_POINT_HISTORY_USER_ID", columnList = "userId"),
+    ]
+)
 class PointHistory(
     @Id
     @GeneratedValue

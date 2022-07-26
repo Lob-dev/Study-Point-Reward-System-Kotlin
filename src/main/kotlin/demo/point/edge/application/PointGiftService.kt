@@ -5,6 +5,7 @@ import demo.point.edge.domain.PointHistoryActivityService
 import demo.point.edge.domain.point.PointHistoryActivity
 import demo.point.edge.domain.point.PointHistoryService
 import demo.point.edge.domain.point.active.PointActivityService
+import demo.point.edge.domain.point.total.PointTotal
 import demo.point.edge.domain.point.total.PointTotalService
 import demo.point.edge.interfaces.handler.PointPresentEvent
 import org.springframework.transaction.annotation.Transactional
@@ -31,7 +32,8 @@ class PointGiftService(
         pointTotalService.findCurrentPointsBy(recipientId).let {
             it?.updatePointsBy(presentEvent.initialPoint) ?: {
                 val currentPointsBy = pointActivityService.findAllCurrentPointsBy(recipientId)
-                pointTotalService.createTotalPointBy(recipientId, currentPointsBy.sumOf { point -> point.currentPoint })
+                val pointTotal = PointTotal(null, recipientId, currentPointsBy.sumOf { point -> point.currentPoint })
+                pointTotalService.createTotalPointBy(pointTotal)
             }
         }
         // TODO: 2022-07-25 May be instead Notification Service

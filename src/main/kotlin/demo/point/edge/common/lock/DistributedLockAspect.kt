@@ -2,7 +2,6 @@ package demo.point.edge.common.lock
 
 import demo.point.edge.common.BusinessException
 import demo.point.edge.common.ErrorStatus
-import demo.point.edge.common.annotation.DistributedLock
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
@@ -38,7 +37,7 @@ class DistributedLockAspect(
     private val expressionParser: ExpressionParser = SpelExpressionParser()
     private val nameDiscoverer: ParameterNameDiscoverer = DefaultParameterNameDiscoverer()
 
-    @Pointcut(value = "@annotation(demo.point.edge.common.annotation.DistributedLock)")
+    @Pointcut(value = "@annotation(demo.point.edge.common.lock.DistributedLock)")
     fun distributedLockPointCut() {
     }
 

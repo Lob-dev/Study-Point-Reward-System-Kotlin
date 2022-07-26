@@ -87,3 +87,7 @@ data class PointCurrentAvailableFindRequest(
 data class PointAccumulateToDayRequest(
     val userId: Long,
 ) {}
+
+data class PointHistoriesFindRequest(
+    val userId: Long,
+) {}

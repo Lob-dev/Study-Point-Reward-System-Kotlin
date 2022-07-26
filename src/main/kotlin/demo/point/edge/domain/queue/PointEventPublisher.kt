@@ -9,5 +9,8 @@ class PointEventPublisher(
 ) {
 
     fun sendEvent(queue: String, payload: Any) =
-        rabbitTemplate.convertAndSend(queue, payload)
+        rabbitTemplate.convertAndSend(queue, payload) {
+            it.messageProperties.priority = 3
+            it
+        }
 }

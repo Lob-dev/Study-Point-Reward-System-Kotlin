@@ -1,10 +1,10 @@
-package demo.point.edge.common.annotation
+package demo.point.edge.common.idempotent
 
 @Target(
     AnnotationTarget.FUNCTION
 )
 @Retention(AnnotationRetention.RUNTIME)
-annotation class IdempotentProcess(
+annotation class Idempotent(
     val prefix: String,
     val suffix: String,
 )

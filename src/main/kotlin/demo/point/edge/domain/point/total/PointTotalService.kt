@@ -7,10 +7,10 @@ class PointTotalService(
     private val pointTotalRepository: PointTotalRepository,
 ) {
 
-    fun createTotalPointBy(userId: Long, initialPoints: Long) =
-        pointTotalRepository.save(PointTotal(null, userId, initialPoints))
-
     fun findCurrentPointsBy(userId: Long): PointTotal? {
         return pointTotalRepository.findByUserId(userId)
     }
+
+    fun createTotalPointBy(pointTotal: PointTotal) =
+        pointTotalRepository.save(pointTotal)
 }

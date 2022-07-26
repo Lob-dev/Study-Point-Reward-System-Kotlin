@@ -1,10 +1,13 @@
 package demo.point.edge.domain.point
 
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.Id
+import javax.persistence.*
 
 @Entity
+@Table(
+    indexes = [
+        Index(name = "IDX_POINT_HISTORY_ACTIVITY_HISTORY_ID", columnList = "historyId")
+    ]
+)
 class PointHistoryActivity(
     @Id
     @GeneratedValue
