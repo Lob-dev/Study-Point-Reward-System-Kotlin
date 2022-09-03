@@ -66,8 +66,8 @@ class IdempotentAspect(
         }
 
         val currentProcess = messageProcessService.createProcessBy(processKey)
-        try {
-            return joinPoint.proceed()
+        return try {
+            joinPoint.proceed()
         } finally {
             messageProcessService.deleteProcessBy(currentProcess)
         }

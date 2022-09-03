@@ -1,15 +1,51 @@
 version: '3'
 
 services:
-  mariadb:
+  mariadb-1-RW:
     image: mariadb:latest
-    container_name: mariadb
+    container_name: mariadb-1-RW
     environment:
       - MARIADB_USER=admin
       - MARIADB_PASSWORD=1234!!
       - MARIADB_ROOT_PASSWORD=1234!!
     ports:
       - "3306:3306"
+    volumes:
+      - "./scripts/schema.sql:/docker-entrypoint-initdb.d/ddl.sql"
+
+  mariadb-1-RO:
+    image: mariadb:latest
+    container_name: mariadb-1-RO
+    environment:
+      - MARIADB_USER=admin
+      - MARIADB_PASSWORD=1234!!
+      - MARIADB_ROOT_PASSWORD=1234!!
+    ports:
+      - "3307:3306"
+    volumes:
+      - "./scripts/schema.sql:/docker-entrypoint-initdb.d/ddl.sql"
+
+  mariadb-2-RW:
+      image: mariadb:latest
+      container_name: mariadb-2-RW
+      environment:
+        - MARIADB_USER=admin
+        - MARIADB_PASSWORD=1234!!
+        - MARIADB_ROOT_PASSWORD=1234!!
+      ports:
+        - "3316:3306"
+      volumes:
+        - "./scripts/schema.sql:/docker-entrypoint-initdb.d/ddl.sql"
+
+  mariadb-2-RO:
+    image: mariadb:latest
+    container_name: mariadb-2-RO
+    environment:
+      - MARIADB_USER=admin
+      - MARIADB_PASSWORD=1234!!
+      - MARIADB_ROOT_PASSWORD=1234!!
+    ports:
+      - "3317:3306"
     volumes:
       - "./scripts/schema.sql:/docker-entrypoint-initdb.d/ddl.sql"
 

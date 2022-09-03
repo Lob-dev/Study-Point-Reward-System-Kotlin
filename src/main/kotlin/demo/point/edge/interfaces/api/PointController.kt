@@ -3,7 +3,6 @@ package demo.point.edge.interfaces.api
 import demo.point.edge.application.PointFacadeService
 import demo.point.edge.common.idempotent.Idempotent
 import demo.point.edge.domain.point.PointHistory
-import demo.point.edge.domain.point.PointHistoryQueryBuilder
 import demo.point.edge.domain.point.PointHistoryService
 import demo.point.edge.domain.point.total.PointTotal
 import demo.point.edge.domain.point.total.PointTotalService
@@ -27,7 +26,7 @@ class PointController(
         @PageableDefault pageable: Pageable,
         request: PointHistoriesFindRequest
     ): ResponseEntity<Page<PointHistory>> {
-        val pointHistoriesByUser = pointHistoryService.getPage(pageable, PointHistoryQueryBuilder.build(request))
+        val pointHistoriesByUser = pointHistoryService.getPage(pageable)
         return ResponseEntity.status(HttpStatus.OK).body(pointHistoriesByUser)
     }
 

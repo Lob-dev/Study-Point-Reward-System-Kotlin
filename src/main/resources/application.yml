@@ -1,18 +1,4 @@
 spring:
-  datasource:
-    url: jdbc:mariadb://localhost:3306/point
-    username: root
-    password: 1234!!
-    driver-class-name: org.mariadb.jdbc.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      show-sql: true
-      format_sql: true
-    open-in-view: false
-
   redis:
     host: localhost
     port: 6379
@@ -26,3 +12,43 @@ spring:
 logging:
   level:
     root: info
+
+shard-group:
+  strategy: RANGE
+  nodes:
+    -
+      group-id: 1
+      read-only: false
+      url: jdbc:mariadb://localhost:3306/point
+      username: root
+      password: 1234!!
+      driver-class-name: org.mariadb.jdbc.Driver
+      minKey: 1
+      maxKey: 300000
+    -
+      group-id: 1
+      read-only: true
+      url: jdbc:mariadb://localhost:3307/point
+      username: root
+      password: 1234!!
+      driver-class-name: org.mariadb.jdbc.Driver
+      minKey: 1
+      maxKey: 300000
+    -
+      group-id: 2
+      read-only: false
+      url: jdbc:mariadb://localhost:3306/point
+      username: root
+      password: 1234!!
+      driver-class-name: org.mariadb.jdbc.Driver
+      minKey: 300001
+      maxKey: 9223372036854775807
+    -
+      group-id: 2
+      read-only: true
+      url: jdbc:mariadb://localhost:3307/point
+      username: root
+      password: 1234!!
+      driver-class-name: org.mariadb.jdbc.Driver
+      minKey: 300001
+      maxKey: 9223372036854775807

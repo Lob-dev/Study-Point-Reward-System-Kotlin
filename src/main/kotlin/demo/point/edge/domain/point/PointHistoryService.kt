@@ -1,6 +1,5 @@
 package demo.point.edge.domain.point
 
-import com.querydsl.core.types.Predicate
 import demo.point.edge.common.BusinessException
 import demo.point.edge.common.Constant.Companion.BEGIN_THE_DAY
 import demo.point.edge.common.Constant.Companion.DEFAULT_ZONE_ID
@@ -16,32 +15,29 @@ import java.time.ZonedDateTime
 
 @Service
 class PointHistoryService(
-    private val pointHistoryRepository: PointHistoryRepository,
-    private val pointHistoryQueryRepository: PointHistoryQueryRepository,
+        private val pointHistoryRepository: PointHistoryRepository
 ) {
 
     @Transactional(readOnly = true)
-    fun getPage(pageable: Pageable, predicate: Predicate): Page<PointHistory> =
-        pointHistoryQueryRepository.getPage(pageable, predicate)
+    fun getPage(pageable: Pageable): Page<PointHistory> =
+            pointHistoryRepository.findAll(pageable)
 
     @Transactional(readOnly = true)
     fun findAllPointHistoriesByToday(userId: Long): List<PointHistory> {
         val beginTheDay = ZonedDateTime.of(TODAY_DATE, BEGIN_THE_DAY, DEFAULT_ZONE_ID)
         val endTheDay = ZonedDateTime.of(TODAY_DATE, END_THE_DAY, DEFAULT_ZONE_ID)
-        return pointHistoryRepository.findByUserIdAndCreateAtBetweenAndActionType(userId, beginTheDay, endTheDay, SAVE)
+        return pointHistoryRepository.findAllByUserIdAndActionTypeWithRange(userId, beginTheDay, endTheDay, SAVE)
     }
 
     fun findBy(historyId: Long): PointHistory =
-        pointHistoryRepository.findById(historyId).orElseThrow {
-            BusinessException(ErrorStatus.NOT_FOUND, "history id = $historyId not Found.")
-        }
+            pointHistoryRepository.findById(historyId)
 
     fun createHistoryBy(newHistory: PointHistory): PointHistory =
-        pointHistoryRepository.save(newHistory)
+            pointHistoryRepository.save(newHistory)
 
     @Transactional
     fun createEffectHistoryBy(effectHistoryId: Long?, newHistory: PointHistory): PointHistory =
-        pointHistoryRepository.save(newHistory.also {
-            newHistory.associateHistoryId = effectHistoryId
-        })
+            pointHistoryRepository.save(newHistory.also {
+                newHistory.associateHistoryId = effectHistoryId
+            })
 }

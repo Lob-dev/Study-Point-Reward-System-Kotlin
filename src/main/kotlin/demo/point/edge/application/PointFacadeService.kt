@@ -59,10 +59,10 @@ class PointFacadeService(
                 "it was point overflow. user id = $userId, remain point = $bucketByPoint"
             )
         }
-        val updatedCurrentPointsByUser = pointActivityService.updateCurrentPointsBy(currentPointsByUser)
+        pointActivityService.updateCurrentPointsBy(currentPointsByUser)
 
         val newHistoryId = pointHistoryService.createHistoryBy(useRequest.toHistory(eventId)).id
-        val historyActivities = updatedCurrentPointsByUser
+        val historyActivities = currentPointsByUser
             .map { PointHistoryActivity(null, newHistoryId, it.id) }
             .toList()
         pointHistoryActivityService.createHistoryActivityBy(historyActivities)

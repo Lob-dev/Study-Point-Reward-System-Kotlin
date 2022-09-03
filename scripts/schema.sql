@@ -25,7 +25,6 @@ CREATE TABLE `point_history`
     `create_at`            datetime(6) NOT NULL,
     `update_at`            datetime(6) NOT NULL,
     `action_type`          varchar(255) DEFAULT NULL,
-    `effect_history_id`    bigint(20) DEFAULT NULL,
     `event_id`             varchar(255) DEFAULT NULL,
     `event_type`           varchar(255) DEFAULT NULL,
     `point`                bigint(20) NOT NULL,
