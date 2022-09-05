@@ -1,9 +1,9 @@
 version: '3'
 
 services:
-  mariadb-1-RW:
+  mariadb-group-1-origin:
     image: mariadb:latest
-    container_name: mariadb-1-RW
+    container_name: mariadb-group-1-origin
     environment:
       - MARIADB_USER=admin
       - MARIADB_PASSWORD=1234!!
@@ -11,11 +11,14 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - "./scripts/schema.sql:/docker-entrypoint-initdb.d/ddl.sql"
+      - "./infra/group-1/origin/scripts/:/docker-entrypoint-initdb.d/"
+      - "./infra/group-1/origin/config/my.cnf:/etc/mysql/my.cnf"
+      - "./infra/group-1/origin/data/:/var/lib/mysql/"
+      - "./infra/group-1/origin/log/:/var/log/mysql/"
 
-  mariadb-1-RO:
+  mariadb-group-1-replica:
     image: mariadb:latest
-    container_name: mariadb-1-RO
+    container_name: mariadb-group-1-replica
     environment:
       - MARIADB_USER=admin
       - MARIADB_PASSWORD=1234!!
@@ -23,23 +26,29 @@ services:
     ports:
       - "3307:3306"
     volumes:
-      - "./scripts/schema.sql:/docker-entrypoint-initdb.d/ddl.sql"
+      - "./infra/group-1/replica/scripts/:/docker-entrypoint-initdb.d/"
+      - "./infra/group-1/replica/config/:/etc/mysql/my.cnf"
+      - "./infra/group-1/replica/data/:/var/lib/mysql/"
+      - "./infra/group-1/replica/log/:/var/log/mysql/"
 
-  mariadb-2-RW:
-      image: mariadb:latest
-      container_name: mariadb-2-RW
-      environment:
-        - MARIADB_USER=admin
-        - MARIADB_PASSWORD=1234!!
-        - MARIADB_ROOT_PASSWORD=1234!!
-      ports:
-        - "3316:3306"
-      volumes:
-        - "./scripts/schema.sql:/docker-entrypoint-initdb.d/ddl.sql"
-
-  mariadb-2-RO:
+  mariadb-group-2-origin:
     image: mariadb:latest
-    container_name: mariadb-2-RO
+    container_name: mariadb-group-2-origin
+    environment:
+      - MARIADB_USER=admin
+      - MARIADB_PASSWORD=1234!!
+      - MARIADB_ROOT_PASSWORD=1234!!
+    ports:
+      - "3316:3306"
+    volumes:
+      - "./infra/group-2/origin/scripts/:/docker-entrypoint-initdb.d/"
+      - "./infra/group-2/origin/config/my.cnf:/etc/mysql/my.cnf"
+      - "./infra/group-2/origin/data/:/var/lib/mysql/"
+      - "./infra/group-2/origin/log/:/var/log/mysql/"
+
+  mariadb-group-2-replica:
+    image: mariadb:latest
+    container_name: mariadb-group-2-replica
     environment:
       - MARIADB_USER=admin
       - MARIADB_PASSWORD=1234!!
@@ -47,7 +56,10 @@ services:
     ports:
       - "3317:3306"
     volumes:
-      - "./scripts/schema.sql:/docker-entrypoint-initdb.d/ddl.sql"
+      - "./infra/group-2/replica/scripts/:/docker-entrypoint-initdb.d/"
+      - "./infra/group-2/replica/config/my.cnf:/etc/mysql/my.cnf"
+      - "./infra/group-2/replica/data/:/var/lib/mysql/"
+      - "./infra/group-2/replica/log/:/var/log/mysql/"
 
   redis:
     image: redis:latest
@@ -65,3 +77,4 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+

@@ -14,6 +14,18 @@ import org.springframework.expression.ExpressionParser
 import org.springframework.expression.spel.standard.SpelExpressionParser
 import org.springframework.stereotype.Component
 
+/**
+ * <pre>
+ * @Sharding(key = "#request.userId")
+ * @GetMapping("/test")
+ * fun test(@RequestBody request: PointCurrentAvailableFindRequest): Page<PointHistory> {
+ *     val condition: Condition = JPointHistory.POINT_HISTORY.USER_ID.eq(request.userId)
+ *     return pointHistoryService.getPage(PageRequest.of(0, 10), condition)
+ * }
+ * </pre>
+ *
+ * @see Sharding
+ */
 @Order(SHARDING_ORDER)
 @Aspect
 @Component

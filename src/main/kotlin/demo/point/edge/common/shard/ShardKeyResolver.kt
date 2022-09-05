@@ -8,7 +8,7 @@ class ShardKeyResolver(
     fun resolveShardKey(shardKey: Long): Long {
         if (shardStrategy.`is`(ShardStrategy.RANGE)) {
             for (metadata in shardMetadata) {
-                if (metadata.minKey <= shardKey || shardKey >= metadata.maxKey) {
+                if (metadata.minKey <= shardKey && shardKey <= metadata.maxKey) {
                     return metadata.id
                 }
             }

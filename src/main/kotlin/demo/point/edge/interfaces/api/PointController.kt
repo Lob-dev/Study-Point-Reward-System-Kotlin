@@ -6,6 +6,8 @@ import demo.point.edge.domain.point.PointHistory
 import demo.point.edge.domain.point.PointHistoryService
 import demo.point.edge.domain.point.total.PointTotal
 import demo.point.edge.domain.point.total.PointTotalService
+import jooq.dsl.tables.JPointHistory
+import org.jooq.Condition
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
@@ -26,7 +28,8 @@ class PointController(
         @PageableDefault pageable: Pageable,
         request: PointHistoriesFindRequest
     ): ResponseEntity<Page<PointHistory>> {
-        val pointHistoriesByUser = pointHistoryService.getPage(pageable)
+        val condition: Condition = JPointHistory.POINT_HISTORY.USER_ID.eq(request.userId)
+        val pointHistoriesByUser = pointHistoryService.getPage(pageable, condition)
         return ResponseEntity.status(HttpStatus.OK).body(pointHistoriesByUser)
     }
 

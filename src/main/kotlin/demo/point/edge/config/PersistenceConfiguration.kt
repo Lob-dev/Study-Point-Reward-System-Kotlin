@@ -10,13 +10,16 @@ import demo.point.edge.config.properties.ShardGroupProperty
 import demo.point.edge.config.properties.ShardNodeConfig
 import mu.KotlinLogging
 import org.jooq.ConnectionProvider
+import org.jooq.SQLDialect
 import org.jooq.impl.*
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource
 import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.EnableTransactionManagement
 import javax.sql.DataSource
 
@@ -36,11 +39,16 @@ class PersistenceConfiguration {
             DefaultConfiguration().apply {
                 set(connectionProvider)
                 set(DefaultExecuteListenerProvider(DefaultExecuteListener()))
+                set(SQLDialect.MARIADB)
             }
 
     @Bean
     fun connectionProvider(lazyDataSource: DataSource): DataSourceConnectionProvider =
             DataSourceConnectionProvider(TransactionAwareDataSourceProxy(lazyDataSource))
+
+    @Bean
+    fun transactionManager(lazyDataSource: DataSource): PlatformTransactionManager =
+            DataSourceTransactionManager(lazyDataSource)
 
     @Bean
     fun lazyDataSource(shardGroupSource: AbstractRoutingDataSource): DataSource =

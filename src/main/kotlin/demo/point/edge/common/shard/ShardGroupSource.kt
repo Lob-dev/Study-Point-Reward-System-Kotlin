@@ -7,26 +7,37 @@ class ShardGroupSource(
         dataSources: Map<Any, Any>,
         private val shardKeyResolver: ShardKeyResolver,
 ) : AbstractRoutingDataSource() {
-    private val defaultLookupKey: String
 
     init {
         val defaultDataSource = dataSources.entries.iterator().next()
-        defaultLookupKey = defaultDataSource.key as String
         super.setDefaultTargetDataSource(defaultDataSource.value)
         super.setTargetDataSources(dataSources)
     }
 
     override fun determineCurrentLookupKey(): Any {
+        val currentLookupKey = "${getGroupId(ShardKeyHolder.getKey())}_${getReadOption()}"
+        logger.debug("current lookup key = $currentLookupKey")
+        return currentLookupKey
+    }
+
+    private fun getGroupId(shardKey: Long): Long {
         if (TransactionShardManager.isCurrentTransactionUseSharding()) {
-            if (TransactionSynchronizationManager.isActualTransactionActive()) {
-                val resolveKey = shardKeyResolver.resolveShardKey(ShardKeyHolder.getKey())
-                return if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
-                    "${resolveKey}_${ReadOption.RO}"
-                } else {
-                    "${resolveKey}_${ReadOption.RW}"
-                }
-            }
+            return shardKeyResolver.resolveShardKey(shardKey)
         }
-        return defaultLookupKey
+        return DEFAULT_GROUP_ID
+    }
+
+    private fun getReadOption(): String {
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
+                return ReadOption.RO.toString()
+            }
+            return ReadOption.RW.toString()
+        }
+        return ReadOption.RW.toString()
+    }
+
+    companion object {
+        private const val DEFAULT_GROUP_ID = 1L
     }
 }

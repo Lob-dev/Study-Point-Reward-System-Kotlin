@@ -7,6 +7,7 @@ import demo.point.edge.common.Constant.Companion.END_THE_DAY
 import demo.point.edge.common.Constant.Companion.TODAY_DATE
 import demo.point.edge.common.ErrorStatus
 import demo.point.edge.domain.point.models.ActionType.SAVE
+import org.jooq.Condition
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -19,8 +20,8 @@ class PointHistoryService(
 ) {
 
     @Transactional(readOnly = true)
-    fun getPage(pageable: Pageable): Page<PointHistory> =
-            pointHistoryRepository.findAll(pageable)
+    fun getPage(pageable: Pageable, condition: Condition): Page<PointHistory> =
+            pointHistoryRepository.findAll(pageable, condition)
 
     @Transactional(readOnly = true)
     fun findAllPointHistoriesByToday(userId: Long): List<PointHistory> {

@@ -6,6 +6,7 @@ import demo.point.edge.domain.point.models.ActionType
 import demo.point.edge.domain.point.models.EventType
 import jooq.dsl.tables.JPointHistory
 import jooq.dsl.tables.records.JPointHistoryRecord
+import org.jooq.Condition
 import org.jooq.DSLContext
 import org.jooq.Record
 import org.springframework.data.domain.Page
@@ -22,7 +23,7 @@ interface PointHistoryRepository {
             actionType: ActionType
     ): List<PointHistory>
 
-    fun findAll(pageable: Pageable): Page<PointHistory>
+    fun findAll(pageable: Pageable, condition: Condition): Page<PointHistory>
     fun findById(id: Long): PointHistory
     fun save(entity: PointHistory): PointHistory
     fun createHistoryBy(newHistory: PointHistory): PointHistory
@@ -59,17 +60,10 @@ class PointHistoryRepositoryImpl(
                     .map { mapping(it) }
                     .toList()
 
-    override fun findAll(pageable: Pageable): Page<PointHistory> {
-        val results = query.select(
-                POINT_HISTORY.ID,
-                POINT_HISTORY.EVENT_ID,
-                POINT_HISTORY.USER_ID,
-                POINT_HISTORY.ASSOCIATE_HISTORY_ID,
-                POINT_HISTORY.EVENT_TYPE,
-                POINT_HISTORY.ACTION_TYPE,
-                POINT_HISTORY.POINT,
-        )
-                .from(POINT_HISTORY)
+    override fun findAll(pageable: Pageable, condition: Condition): Page<PointHistory> {
+        val results = query
+                .selectFrom(POINT_HISTORY)
+                .where(condition)
                 .orderBy(POINT_HISTORY.ID)
                 .limit(pageable.pageSize).offset(pageable.offset)
                 .map { mapping(it) }

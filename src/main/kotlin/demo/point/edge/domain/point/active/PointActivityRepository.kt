@@ -36,7 +36,7 @@ class PointActivityRepositoryImpl(
                     .from(POINT_ACTIVITY)
                     .where(POINT_ACTIVITY.ID.eq(id))
                     .fetchOne()
-                    ?.map { mapping(it) }
+                    ?.map { mapping(it) } 
                     ?: throw BusinessException(ErrorStatus.NOT_FOUND, "Activity id = $id not Found.")
 
     override fun findAllById(ids: List<Long>): MutableList<PointActivity> =
